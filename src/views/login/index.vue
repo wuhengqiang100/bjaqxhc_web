@@ -3,51 +3,71 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">北京开窗安全线机检信息系统</h3>
       </div>
+      <el-tabs  v-model="activeName" @tab-click="handleClick" stretch="true">
+        <el-tab-pane  label="账户登陆" name="first">
+          <el-form-item prop="username">
+            <span class="svg-container">
+              <svg-icon icon-class="user" />
+            </span>
+            <el-input
+              ref="username"
+              v-model="loginForm.username"
+              placeholder="Username"
+              name="username"
+              type="text"
+              tabindex="1"
+              autocomplete="on"
+            />
+          </el-form-item>
 
-      <el-form-item prop="username">
-        <span class="svg-container">
-          <svg-icon icon-class="user" />
-        </span>
-        <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
-          name="username"
-          type="text"
-          tabindex="1"
-          autocomplete="on"
-        />
-      </el-form-item>
+          <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
+            <el-form-item prop="password">
+              <span class="svg-container">
+                <svg-icon icon-class="password" />
+              </span>
+              <el-input
+                :key="passwordType"
+                ref="password"
+                v-model="loginForm.password"
+                :type="passwordType"
+                placeholder="Password"
+                name="password"
+                tabindex="2"
+                autocomplete="on"
+                @keyup.native="checkCapslock"
+                @blur="capsTooltip = false"
+                @keyup.enter.native="handleLogin"
+              />
+              <span class="show-pwd" @click="showPwd">
+                <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+              </span>
+            </el-form-item>
+          </el-tooltip>
 
-      <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
-        <el-form-item prop="password">
+          <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登陆</el-button>
+
+        </el-tab-pane>
+        <el-tab-pane  label="刷卡登陆" name="second">
+           <el-form-item prop="userId">
           <span class="svg-container">
-            <svg-icon icon-class="password" />
+            <svg-icon icon-class="user" />
           </span>
           <el-input
-            :key="passwordType"
-            ref="password"
-            v-model="loginForm.password"
-            :type="passwordType"
-            placeholder="Password"
-            name="password"
-            tabindex="2"
-            autocomplete="on"
-            @keyup.native="checkCapslock"
-            @blur="capsTooltip = false"
-            @keyup.enter.native="handleLogin"
-          />
-          <span class="show-pwd" @click="showPwd">
-            <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
-          </span>
-        </el-form-item>
-      </el-tooltip>
+            ref="userId"
+            v-model="userId"
+            placeholder="userId"
+            name="userId"
+            type="text"
+            autocomplete="on"/>
+          </el-form-item>
+            <!-- <el-input ref="userId" v-model="userId" placeholder="请输入内容"></el-input> -->
+        </el-tab-pane>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登陆</el-button>
+      </el-tabs>
 
-      <div style="position:relative">
+ <!--     <div style="position:relative">
         <div class="tips">
           <span>Username : admin</span>
           <span>Password : any</span>
@@ -60,16 +80,17 @@
         <el-button class="thirdparty-button" type="primary" @click="showDialog=true">
           Or connect with
         </el-button>
-      </div>
+      </div> -->
     </el-form>
-
+<!--
     <el-dialog title="Or connect with" :visible.sync="showDialog">
       Can not be simulated on local, so please combine you own business simulation! ! !
       <br>
       <br>
       <br>
       <social-sign />
-    </el-dialog>
+      <check-login/>
+    </el-dialog> -->
   </div>
 </template>
 
@@ -78,7 +99,7 @@ import {
   validUsername
 } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
-//import request from '../../utils/request.js'
+
 export default {
   name: 'Login',
   components: {
@@ -87,22 +108,24 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入正确的用户名称'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('密码不少于6个字符'))
       } else {
         callback()
       }
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111'
+     /*   username: 'admin',
+        password: '111111'  , */
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [{
@@ -121,7 +144,9 @@ export default {
       loading: false,
       showDialog: false,
       redirect: undefined,
-      otherQuery: {}
+      otherQuery: {},
+      activeName: 'first',
+      userId:null
     }
   },
   watch: {
@@ -165,6 +190,14 @@ export default {
         this.capsTooltip = false
       }
     },
+    //切换登陆方式
+    handleClick(tab, event) {
+          console.log(this.activeName);
+          //快捷登陆
+          if(this.activeName === 'second'){
+             this.$refs.userId.focus()
+          }
+      },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -239,6 +272,7 @@ export default {
 
   /* reset element-ui css */
   .login-container {
+
     .el-input {
       display: inline-block;
       height: 47px;
@@ -288,6 +322,13 @@ export default {
       padding: 160px 35px 0;
       margin: 0 auto;
       overflow: hidden;
+      .tabItem{
+
+          text-align: center;
+          font-size: 50px;
+
+
+      }
     }
 
     .tips {
