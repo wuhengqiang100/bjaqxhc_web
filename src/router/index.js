@@ -7,10 +7,10 @@ Vue.use(Router)
 import Layout from '@/layout'
 
 /* Router Modules */
-import componentsRouter from './modules/components'
+/* import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
-import nestedRouter from './modules/nested'
+import nestedRouter from './modules/nested' */
 
 // 自定义管理菜单
 import jcxxMenuRouter from './modules/jcxxMenu'
@@ -141,7 +141,7 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  {
+/*   {
     path: '/permission',
     component: Layout,
     redirect: '/permission/page',
@@ -194,7 +194,7 @@ export const asyncRoutes = [
         meta: { title: 'Icons', icon: 'icon', noCache: true }
       }
     ]
-  },
+  }, */
   jcxxMenuRouter, // 基础信息配置菜单
   jjsjMenuRouter, // 机检数据管理菜单
   zlsjMenuRouter, // 质量数据菜单
@@ -203,7 +203,7 @@ export const asyncRoutes = [
   jkbjMenuRouter, // 监控报警菜单
 
   /** when your routing map is too long, you can split it into small modules **/
-  componentsRouter,
+  /* componentsRouter,
   chartsRouter,
   nestedRouter,
   tableRouter,
@@ -401,7 +401,7 @@ export const asyncRoutes = [
     ]
   },
 
-  // 404 page must be placed at the end !!!
+  404 page must be placed at the end !!! */
   { path: '*', redirect: '/404', hidden: true }
 ]
 

@@ -4,7 +4,8 @@ export function login(data) {
   return request({
     url: '/user/login',
     method: 'post',
-    data
+    data,
+    baseUrl: 'http:/127.0.0.1:8088'
   })
 }
 
@@ -12,7 +13,8 @@ export function getInfo(token) {
   return request({
     url: '/user/info',
     method: 'get',
-    params: { token }
+    params: { token },
+    baseUrl: 'http:/127.0.0.1:8088'
   })
 }
 
