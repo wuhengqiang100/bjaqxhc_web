@@ -9,6 +9,15 @@ export function fetchList(query) {
   })
 }
 
+export function updateUseFlag(id) {
+  return request({
+    url: '/device/updateUseFlag',
+    method: 'post',
+    params: { id },
+    baseURL: 'http://127.0.0.1:8088'
+  })
+}
+
 export function fetchDevice(id) {
   return request({
     url: '/device/detail',

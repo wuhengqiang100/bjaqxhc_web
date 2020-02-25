@@ -35,11 +35,57 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80" :class-name="getSortClass('id')">
+      <el-table-column label="设备id" prop="id" sortable="custom" align="center" width="80" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
-          <span>{{ row.id }}</span>
+          <span>{{ row.machineId }}</span>
         </template>
       </el-table-column>
+      <!--     <el-table-column label="设备id" width="110px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.machineId }}</span>
+        </template>
+      </el-table-column> -->
+      <el-table-column label="设备code" width="110px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.machineCode }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="设备名称" width="110px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.machineName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="设备ip" width="110px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.machineIp }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="启用状态" width="110px" align="center">
+        <template slot-scope="{row}">
+          <el-tag v-if="row.useFlag===0" type="danger">
+            禁用
+          </el-tag>
+          <el-tag v-else type="success">
+            启用
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="启用时间" width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.startDate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="结束时间" width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.endDate | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" width="110px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.note }}</span>
+        </template>
+      </el-table-column>
+      <!--
       <el-table-column label="Date" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -78,21 +124,23 @@
             {{ row.status }}
           </el-tag>
         </template>
-      </el-table-column>
-      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
+      </el-table-column> -->
+      <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
+            修改
           </el-button>
-          <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+          <el-button v-if="row.useFlag===0" size="mini" type="success" @click="handleModifyUseFlag(row,'1')">启用</el-button>
+          <el-button v-else size="mini" type="danger" @click="handleModifyUseFlag(row,'0')">禁用</el-button>
+          <!--     <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+            禁用
+          </el-button> -->
+          <!--    <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
             Publish
           </el-button>
           <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
             Draft
-          </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
-            Delete
-          </el-button>
+          </el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -148,7 +196,7 @@
 
 <script>
 
-import { fetchList, fetchPv, createDevice, updateDevice } from '@/api/device'
+import { fetchList, fetchPv, createDevice, updateDevice, updateUseFlag } from '@/api/device'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -226,10 +274,12 @@ export default {
       downloadLoading: false
     }
   },
+  // 初始化获取数据列表
   created() {
     this.getList()
   },
   methods: {
+    // 有加载圈的加载数据列表
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
@@ -242,9 +292,37 @@ export default {
         }, 1.5 * 1000)
       })
     },
+    // 自己刷新数据列表
+    refreshList() {
+      fetchList(this.listQuery).then(response => {
+        this.list = response.data.items
+        this.total = response.data.total
+      })
+    },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
+    },
+    // 设备禁用启用操作
+    handleModifyUseFlag(row, useFlag) {
+      console.log(row)
+      console.log(useFlag)
+      updateUseFlag(row.machineId).then(response => {
+        if (response.code === 20000) {
+          this.$message({
+            message: response.message,
+            type: 'success'
+          })
+          this.refreshList()
+        } else {
+          this.$message({
+            message: response.message,
+            type: 'danger'
+          })
+        }
+      })
+
+      row.status = status
     },
     handleModifyStatus(row, status) {
       this.$message({
