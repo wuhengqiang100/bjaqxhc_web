@@ -5,7 +5,7 @@ export function login(data) {
     url: '/user/login',
     method: 'post',
     data,
-    baseUrl: 'http:/127.0.0.1:8088'
+    baseURL: 'http://127.0.0.1:8088'
   })
 }
 
@@ -14,7 +14,7 @@ export function getInfo(token) {
     url: '/user/info',
     method: 'get',
     params: { token },
-    baseUrl: 'http:/127.0.0.1:8088'
+    baseURL: 'http://127.0.0.1:8088'
   })
 }
 
