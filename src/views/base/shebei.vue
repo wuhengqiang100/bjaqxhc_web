@@ -62,21 +62,21 @@
       </el-table-column>
       <el-table-column label="启用状态" width="110px" align="center">
         <template slot-scope="{row}">
-          <el-tag v-if="row.useFlag===0" type="danger">
-            禁用
-          </el-tag>
-          <el-tag v-else type="success">
+          <el-tag v-if="row.useFlag" type="success">
             启用
+          </el-tag>
+          <el-tag v-else type="danger">
+            禁用
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="启用时间" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.startDate }}</span>
+          <span>{{ row.startDate | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="结束时间" width="150px" align="center">
-        <template slot-scope="{row}">
+        <template v-if="row.endDate !==null" slot-scope="{row}">
           <span>{{ row.endDate | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
@@ -130,8 +130,9 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             修改
           </el-button>
-          <el-button v-if="row.useFlag===0" size="mini" type="success" @click="handleModifyUseFlag(row,'1')">启用</el-button>
-          <el-button v-else size="mini" type="danger" @click="handleModifyUseFlag(row,'0')">禁用</el-button>
+          <!-- <el-button v-if="row.useFlag===0" size="mini" type="success" @click="handleModifyUseFlag(row,true)">启用</el-button> -->
+          <el-button v-if="row.useFlag" size="mini" type="danger" @click="handleModifyUseFlag(row,false)">禁用</el-button>
+          <el-button v-else size="mini" type="success" @click="handleModifyUseFlag(row,true)">启用</el-button>
           <!--     <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
             禁用
           </el-button> -->
@@ -148,8 +149,8 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Type" prop="type">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <!--   <el-form-item label="Type" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
@@ -170,6 +171,31 @@
         </el-form-item>
         <el-form-item label="Remark">
           <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        </el-form-item> -->
+        <!--       <el-form-item label="设备id" prop="machineId">
+          <el-input v-model="temp.machineId" />
+        </el-form-item> -->
+        <el-form-item label="设备code" prop="machineCode">
+          <el-input v-model="temp.machineCode" type="text" placeholder="请输入设备code" />
+        </el-form-item>
+        <el-form-item label="设备name" prop="machineName">
+          <el-input v-model="temp.machineName" type="text" placeholder="请输入设备name" />
+        </el-form-item>
+        <el-form-item label="设备ip" prop="machineIp">
+          <el-input v-model="temp.machineIp" type="text" placeholder="请输入设备ip" />
+        </el-form-item>
+        <el-form-item label="启用状态" prop="useFlag">
+          <el-switch v-model="temp.useFlag" active-color="#13ce66" inactive-color="#ff4949" />
+        </el-form-item>
+        <el-form-item label="启用时间" prop="startDate">
+          <el-date-picker v-model="temp.startDate" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="请选择一个开始时间" />
+        </el-form-item>
+        <el-form-item label="结束时间" prop="endDate">
+          <el-date-picker v-model="temp.endDate" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="请选择一个结束时间" />
+
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="temp.note" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -238,7 +264,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
+        limit: 10,
         importance: undefined,
         title: undefined,
         type: undefined,
@@ -250,13 +276,14 @@ export default {
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        machineId: undefined,
+        machineCode: '',
+        machineName: '',
+        machineIp: '',
+        useFlag: true,
+        startDate: new Date(),
+        endDate: '',
+        note: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -267,9 +294,14 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        // type: [{ required: true, message: 'type is required', trigger: 'change' }],
+        // timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
+        machineCode: [{ required: true, message: '请填写设备code', trigger: 'blur' }],
+        machineName: [{ required: true, message: '请填写设备name', trigger: 'blur' }],
+        machineIp: [{ required: true, message: '请填写设备ip', trigger: 'blur' }],
+        startDate: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }]
+        // endDate: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }]
+
       },
       downloadLoading: false
     }
@@ -289,10 +321,10 @@ export default {
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
-        }, 1.5 * 1000)
+        }, 1 * 1000)
       })
     },
-    // 自己刷新数据列表
+    // 立即刷新数据列表
     refreshList() {
       fetchList(this.listQuery).then(response => {
         this.list = response.data.items
@@ -305,21 +337,12 @@ export default {
     },
     // 设备禁用启用操作
     handleModifyUseFlag(row, useFlag) {
-      console.log(row)
-      console.log(useFlag)
       updateUseFlag(row.machineId).then(response => {
-        if (response.code === 20000) {
-          this.$message({
-            message: response.message,
-            type: 'success'
-          })
-          this.refreshList()
-        } else {
-          this.$message({
-            message: response.message,
-            type: 'danger'
-          })
-        }
+        this.$message({
+          message: response.message,
+          type: 'success'
+        })
+        this.refreshList()
       })
 
       row.status = status
@@ -337,6 +360,7 @@ export default {
         this.sortByID(order)
       }
     },
+    // id排序操作
     sortByID(order) {
       if (order === 'ascending') {
         this.listQuery.sort = '+id'
@@ -345,17 +369,20 @@ export default {
       }
       this.handleFilter()
     },
+    // 重置temp实体类变量属性
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        machineId: undefined,
+        machineCode: '',
+        machineName: '',
+        machineIp: '',
+        useFlag: true,
+        startDate: new Date(),
+        endDate: '',
+        note: ''
       }
     },
+    // 监听create dialog事件
     handleCreate() {
       this.resetTemp()
       this.dialogStatus = 'create'
@@ -364,17 +391,24 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    // 添加操作
     createData() {
       this.$refs['dataForm'].validate((valid) => {
+        // date格式化
+        this.temp.startDate = parseTime(this.temp.startDate)
+        if (this.temp.endDate !== '') {
+          this.temp.endDate = parseTime(this.temp.endDate)
+        }
+
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
+          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           createDevice(this.temp).then(() => {
-            this.list.unshift(this.temp)
+            this.refreshList()
+            // this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
               title: 'Success',
-              message: 'Created Successfully',
+              message: '添加成功',
               type: 'success',
               duration: 2000
             })
@@ -382,39 +416,70 @@ export default {
         }
       })
     },
+    // 监听修改 update dialog事件
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      // this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    // 修改操作
     updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateDevice(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Update Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
-        }
+      // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
+      updateDevice(this.temp).then(() => {
+        this.refreshList()
+        // this.list.unshift(this.temp)
+        this.dialogFormVisible = false
+        this.$notify({
+          title: 'Success',
+          message: '修改成功',
+          type: 'success',
+          duration: 2000
+        })
       })
     },
+    // 修改操作
+    // updateData() {
+    //   console.log(this.temp.machineCode)
+    //   console.log(parseTime(this.temp.startDate))
+    //   this.$refs['dataForm'].validate((valid) => {
+    //     // console.log('step', 'aa')
+    //     // this.temp.startDate = parseTime(this.temp.startDate)
+    //     // if (this.temp.endDate !== '') {
+    //     //   this.temp.endDate = parseTime(this.temp.endDate)
+    //     // }
+    //     // console.log('step1', 'aa')
+    //     console.log('tag', this.valid)
+    //     if (valid) {
+    //       console.log('step1', 'bb')
+    //       // const tempData = Object.assign({}, this.temp)
+    //       // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+    //       updateDevice(this.temp).then(() => {
+    //         /*     for (const v of this.list) {
+    //           if (v.id === this.temp.id) {
+    //             const index = this.list.indexOf(v)
+    //             this.list.splice(index, 1, this.temp)
+    //             break
+    //           }
+    //         } */
+    //         this.refreshList()
+
+    //         this.dialogFormVisible = false
+    //         this.$notify({
+    //           title: 'Success',
+    //           message: '修改成功',
+    //           type: 'success',
+    //           duration: 2000
+    //         })
+    //       })
+    //     }
+    //   })
+    //   console.log('tag', this.valid)
+    // },
+    // 监听删除dialog事件
     handleDelete(row) {
       this.$notify({
         title: 'Success',

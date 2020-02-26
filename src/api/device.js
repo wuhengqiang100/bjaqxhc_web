@@ -38,7 +38,8 @@ export function createDevice(data) {
   return request({
     url: '/device/create',
     method: 'post',
-    data
+    data,
+    baseURL: 'http://127.0.0.1:8088'
   })
 }
 
@@ -46,6 +47,7 @@ export function updateDevice(data) {
   return request({
     url: '/device/update',
     method: 'post',
-    data
+    data,
+    baseURL: 'http://127.0.0.1:8088'
   })
 }
