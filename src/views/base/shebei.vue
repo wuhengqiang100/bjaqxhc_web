@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <!--     <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
+      <el-input v-model="listQuery.title" placeholder="请输入设备名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <!--           <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
       </el-select>
       <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
@@ -10,9 +10,20 @@
       </el-select>
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select> -->
+      </el-select>
+       <el-input v-model="listQuery.useFlag" placeholder="状态" clearable style="width: 90px" class="filter-item">
+        useFlagOptions
+        <el-option v-for="item in useFlagOptions" :key="item" :label="item" :value="item" />
+      </el-input> -->
+
+      <el-select v-model="listQuery.useFlag" placeholder="状态" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in useFlagOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+      </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
+      </el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" @click="handleReset">
+        重置
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         添加
@@ -35,7 +46,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="设备id" prop="id" sortable="custom" align="center" width="80" :class-name="getSortClass('id')">
+      <el-table-column label="设备id" prop="id" sortable="custom" align="center" width="120" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
           <span>{{ row.machineId }}</span>
         </template>
@@ -45,22 +56,22 @@
           <span>{{ row.machineId }}</span>
         </template>
       </el-table-column> -->
-      <el-table-column label="设备code" width="110px" align="center">
+      <el-table-column label="设备code" width="120" align="center">
         <template slot-scope="{row}">
           <span>{{ row.machineCode }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="设备名称" width="110px" align="center">
+      <el-table-column label="设备名称" width="120" align="center">
         <template slot-scope="{row}">
           <span>{{ row.machineName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="设备ip" width="110px" align="center">
+      <el-table-column label="设备ip" width="120" align="center">
         <template slot-scope="{row}">
           <span>{{ row.machineIp }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="启用状态" width="110px" align="center">
+      <el-table-column label="启用状态" width="120" align="center">
         <template slot-scope="{row}">
           <el-tag v-if="row.useFlag" type="success">
             启用
@@ -70,17 +81,17 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="启用时间" width="150px" align="center">
+      <el-table-column label="启用时间" width="150" align="center">
         <template slot-scope="{row}">
           <span>{{ row.startDate | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="结束时间" width="150px" align="center">
+      <el-table-column label="结束时间" width="150" align="center">
         <template v-if="row.endDate !==null" slot-scope="{row}">
           <span>{{ row.endDate | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="备注" width="110px" align="center">
+      <el-table-column label="备注" min-width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.note }}</span>
         </template>
@@ -125,7 +136,7 @@
           </el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             修改
@@ -228,9 +239,14 @@ import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
+  { key: '0', display_name: '禁用' },
+  { key: '1', display_name: '启用' },
+  { key: '2', display_name: 'Eurozone' }
+]
+
+const useFlagOptions = [
+  { key: '0', display_name: '禁用' },
+  { key: '1', display_name: '启用' }
 ]
 
 // arr to obj, such as { CN : "China", US : "USA" }
@@ -265,13 +281,14 @@ export default {
       listQuery: {
         page: 1,
         limit: 10,
-        importance: undefined,
+        useFlag: undefined,
+        // importance: undefined,
         title: undefined,
-        type: undefined,
         sort: '+id'
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
+      useFlagOptions, // 启用状态
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
@@ -299,7 +316,7 @@ export default {
         machineCode: [{ required: true, message: '请填写设备code', trigger: 'blur' }],
         machineName: [{ required: true, message: '请填写设备name', trigger: 'blur' }],
         machineIp: [{ required: true, message: '请填写设备ip', trigger: 'blur' }],
-        startDate: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }]
+        startDate: [{ type: 'date', required: true, message: '请填写开始时间', trigger: 'change' }]
         // endDate: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }]
 
       },
@@ -332,8 +349,16 @@ export default {
       })
     },
     handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
+      this.listLoading = true
+      fetchList(this.listQuery).then(response => {
+        this.list = response.data.items
+        this.total = response.data.total
+
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1 * 1000)
+      })
     },
     // 设备禁用启用操作
     handleModifyUseFlag(row, useFlag) {
@@ -381,6 +406,20 @@ export default {
         endDate: '',
         note: ''
       }
+    },
+    resetListQuery() {
+      this.listQuery = {
+        page: 1,
+        limit: 10,
+        useFlag: undefined,
+        // importance: undefined,
+        title: undefined,
+        sort: '+id'
+      }
+    },
+    handleReset() {
+      this.resetListQuery()
+      this.getList()
     },
     // 监听create dialog事件
     handleCreate() {
