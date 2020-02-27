@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/device/list',
+    url: '/deviceType/list',
     method: 'get',
     params: query,
     baseURL: 'http://127.0.0.1:8088'
@@ -19,16 +19,16 @@ export function fetchMachineTypeList() {
 
 export function updateUseFlag(id) {
   return request({
-    url: '/device/updateUseFlag',
+    url: '/deviceType/updateUseFlag',
     method: 'post',
     params: { id },
     baseURL: 'http://127.0.0.1:8088'
   })
 }
 
-export function fetchDevice(id) {
+export function fetchDeviceType(id) {
   return request({
-    url: '/device/detail',
+    url: '/deviceType/detail',
     method: 'get',
     params: { id }
   })
@@ -36,24 +36,24 @@ export function fetchDevice(id) {
 
 export function fetchPv(pv) {
   return request({
-    url: '/device/pv',
+    url: '/deviceType/pv',
     method: 'get',
     params: { pv }
   })
 }
 
-export function createDevice(data) {
+export function createDeviceType(data) {
   return request({
-    url: '/device/create',
+    url: '/deviceType/create',
     method: 'post',
     data,
     baseURL: 'http://127.0.0.1:8088'
   })
 }
 
-export function updateDevice(data) {
+export function updateDeviceType(data) {
   return request({
-    url: '/device/update',
+    url: '/deviceType/update',
     method: 'post',
     data,
     baseURL: 'http://127.0.0.1:8088'

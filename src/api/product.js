@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/device/list',
+    url: '/product/list',
     method: 'get',
     params: query,
     baseURL: 'http://127.0.0.1:8088'
@@ -11,7 +11,7 @@ export function fetchList(query) {
 
 export function fetchMachineTypeList() {
   return request({
-    url: '/deviceType/listOption',
+    url: '/product/listOption',
     method: 'get',
     baseURL: 'http://127.0.0.1:8088'
   })
@@ -19,16 +19,16 @@ export function fetchMachineTypeList() {
 
 export function updateUseFlag(id) {
   return request({
-    url: '/device/updateUseFlag',
+    url: '/product/updateUseFlag',
     method: 'post',
     params: { id },
     baseURL: 'http://127.0.0.1:8088'
   })
 }
 
-export function fetchDevice(id) {
+export function fetchProduct(id) {
   return request({
-    url: '/device/detail',
+    url: '/product/detail',
     method: 'get',
     params: { id }
   })
@@ -36,24 +36,24 @@ export function fetchDevice(id) {
 
 export function fetchPv(pv) {
   return request({
-    url: '/device/pv',
+    url: '/product/pv',
     method: 'get',
     params: { pv }
   })
 }
 
-export function createDevice(data) {
+export function createProduct(data) {
   return request({
-    url: '/device/create',
+    url: '/product/create',
     method: 'post',
     data,
     baseURL: 'http://127.0.0.1:8088'
   })
 }
 
-export function updateDevice(data) {
+export function updateProduct(data) {
   return request({
-    url: '/device/update',
+    url: '/product/update',
     method: 'post',
     data,
     baseURL: 'http://127.0.0.1:8088'

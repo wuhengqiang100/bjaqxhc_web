@@ -2,19 +2,6 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.title" placeholder="请输入设备名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <!--           <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-       <el-input v-model="listQuery.useFlag" placeholder="状态" clearable style="width: 90px" class="filter-item">
-        useFlagOptions
-        <el-option v-for="item in useFlagOptions" :key="item" :label="item" :value="item" />
-      </el-input> -->
 
       <el-select v-model="listQuery.useFlag" placeholder="状态" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in useFlagOptions" :key="item.key" :label="item.display_name" :value="item.key" />
@@ -28,12 +15,6 @@
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         添加
       </el-button>
-      <!--     <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        Export
-      </el-button>
-      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        reviewer
-      </el-checkbox> -->
     </div>
 
     <el-table
@@ -46,32 +27,33 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="设备id" prop="id" sortable="custom" align="center" width="120" :class-name="getSortClass('id')">
+      <el-table-column label="设备id" prop="id" sortable="custom" align="center" width="100" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
           <span>{{ row.machineId }}</span>
         </template>
       </el-table-column>
-      <!--     <el-table-column label="设备id" width="110px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.machineId }}</span>
-        </template>
-      </el-table-column> -->
-      <el-table-column label="设备code" width="120" align="center">
+      <el-table-column label="设备code" width="110" align="center">
         <template slot-scope="{row}">
           <span>{{ row.machineCode }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="设备名称" width="120" align="center">
+      <el-table-column label="设备名称" width="110" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.machineName }}</span>
+          <span class="link-type" @click="handleUpdate(row)">{{ row.machineName }}</span>
+          <!-- <span>{{ row.machineName }}</span> -->
         </template>
       </el-table-column>
-      <el-table-column label="设备ip" width="120" align="center">
+      <el-table-column label="设备名称" width="110" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.deviceType.machineTypeName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="设备ip" width="110" align="center">
         <template slot-scope="{row}">
           <span>{{ row.machineIp }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="启用状态" width="120" align="center">
+      <el-table-column label="启用状态" width="110" align="center">
         <template slot-scope="{row}">
           <el-tag v-if="row.useFlag" type="success">
             启用
@@ -91,68 +73,18 @@
           <span>{{ row.endDate | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="备注" min-width="150px" align="center">
+      <el-table-column label="备注" min-width="110px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.note }}</span>
         </template>
       </el-table-column>
-      <!--
-      <el-table-column label="Date" width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Title" min-width="150px">
-        <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
-          <el-tag>{{ row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="Author" width="110px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.author }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column v-if="showReviewer" label="Reviewer" width="110px" align="center">
-        <template slot-scope="{row}">
-          <span style="color:red;">{{ row.reviewer }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Imp" width="80px">
-        <template slot-scope="{row}">
-          <svg-icon v-for="n in + row.importance" :key="n" icon-class="star" class="meta-item__icon" />
-        </template>
-      </el-table-column>
-      <el-table-column label="Readings" align="center" width="95">
-        <template slot-scope="{row}">
-          <span v-if="row.pageviews" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
-          <span v-else>0</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Status" class-name="status-col" width="100">
-        <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter">
-            {{ row.status }}
-          </el-tag>
-        </template>
-      </el-table-column> -->
-      <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             修改
           </el-button>
-          <!-- <el-button v-if="row.useFlag===0" size="mini" type="success" @click="handleModifyUseFlag(row,true)">启用</el-button> -->
           <el-button v-if="row.useFlag" size="mini" type="danger" @click="handleModifyUseFlag(row,false)">禁用</el-button>
           <el-button v-else size="mini" type="success" @click="handleModifyUseFlag(row,true)">启用</el-button>
-          <!--     <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
-            禁用
-          </el-button> -->
-          <!--    <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
-            Publish
-          </el-button>
-          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
-            Draft
-          </el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -161,36 +93,17 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
-        <!--   <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
-        </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
-        </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
-        </el-form-item> -->
-        <!--       <el-form-item label="设备id" prop="machineId">
-          <el-input v-model="temp.machineId" />
-        </el-form-item> -->
         <el-form-item label="设备code" prop="machineCode">
           <el-input v-model="temp.machineCode" type="text" placeholder="请输入设备code" />
         </el-form-item>
         <el-form-item label="设备name" prop="machineName">
           <el-input v-model="temp.machineName" type="text" placeholder="请输入设备name" />
+        </el-form-item>
+
+        <el-form-item label="设备类别" prop="machineTypeId">
+          <el-select v-model="temp.machineTypeId" class="filter-item" placeholder="请选择类别">
+            <el-option v-for="item in machineTypeOptions" :key="item.machineTypeId" :label="item.machineTypeName" :value="item.machineTypeId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="设备ip" prop="machineIp">
           <el-input v-model="temp.machineIp" type="text" placeholder="请输入设备ip" />
@@ -233,16 +146,12 @@
 
 <script>
 
-import { fetchList, fetchPv, createDevice, updateDevice, updateUseFlag } from '@/api/device'
+import { fetchList, fetchPv, createDevice, updateDevice, updateUseFlag, fetchMachineTypeList } from '@/api/device'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-const calendarTypeOptions = [
-  { key: '0', display_name: '禁用' },
-  { key: '1', display_name: '启用' },
-  { key: '2', display_name: 'Eurozone' }
-]
+const machineTypeOptions = []
 
 const useFlagOptions = [
   { key: '0', display_name: '禁用' },
@@ -250,7 +159,7 @@ const useFlagOptions = [
 ]
 
 // arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
+const calendarTypeKeyValue = machineTypeOptions.reduce((acc, cur) => {
   acc[cur.key] = cur.display_name
   return acc
 }, {})
@@ -287,7 +196,7 @@ export default {
         sort: '+id'
       },
       importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
+      machineTypeOptions,
       useFlagOptions, // 启用状态
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
@@ -296,6 +205,7 @@ export default {
         machineId: undefined,
         machineCode: '',
         machineName: '',
+        machineTypeId: undefined,
         machineIp: '',
         useFlag: true,
         startDate: new Date(),
@@ -326,6 +236,7 @@ export default {
   // 初始化获取数据列表
   created() {
     this.getList()
+    this.getMachineTypes()
   },
   methods: {
     // 有加载圈的加载数据列表
@@ -339,6 +250,13 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 1 * 1000)
+      })
+    },
+    getMachineTypes() {
+      fetchMachineTypeList().then(response => {
+        console.log('tag', response.data)
+        this.machineTypeOptions = response.data
+        console.log('tag', this.machineTypeOptions)
       })
     },
     // 立即刷新数据列表
@@ -400,6 +318,7 @@ export default {
         machineId: undefined,
         machineCode: '',
         machineName: '',
+        machineTypeId: undefined,
         machineIp: '',
         useFlag: true,
         startDate: new Date(),
@@ -480,44 +399,6 @@ export default {
         })
       })
     },
-    // 修改操作
-    // updateData() {
-    //   console.log(this.temp.machineCode)
-    //   console.log(parseTime(this.temp.startDate))
-    //   this.$refs['dataForm'].validate((valid) => {
-    //     // console.log('step', 'aa')
-    //     // this.temp.startDate = parseTime(this.temp.startDate)
-    //     // if (this.temp.endDate !== '') {
-    //     //   this.temp.endDate = parseTime(this.temp.endDate)
-    //     // }
-    //     // console.log('step1', 'aa')
-    //     console.log('tag', this.valid)
-    //     if (valid) {
-    //       console.log('step1', 'bb')
-    //       // const tempData = Object.assign({}, this.temp)
-    //       // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-    //       updateDevice(this.temp).then(() => {
-    //         /*     for (const v of this.list) {
-    //           if (v.id === this.temp.id) {
-    //             const index = this.list.indexOf(v)
-    //             this.list.splice(index, 1, this.temp)
-    //             break
-    //           }
-    //         } */
-    //         this.refreshList()
-
-    //         this.dialogFormVisible = false
-    //         this.$notify({
-    //           title: 'Success',
-    //           message: '修改成功',
-    //           type: 'success',
-    //           duration: 2000
-    //         })
-    //       })
-    //     }
-    //   })
-    //   console.log('tag', this.valid)
-    // },
     // 监听删除dialog事件
     handleDelete(row) {
       this.$notify({
