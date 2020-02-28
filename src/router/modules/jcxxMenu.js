@@ -19,6 +19,12 @@ const tableRouter = {
       name: 'renyuan',
       meta: { title: '人员管理' }
     },
+      {
+      path: 'jiedianleibie',
+      component: () => import('@/views/base/jiedianleibie'),
+      name: 'jiedianleibie',
+      meta: { title: '节点类别管理' }
+    },
     {
       path: 'jiedian',
       component: () => import('@/views/base/jiedian'),

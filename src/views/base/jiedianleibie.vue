@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="请输入人员名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.title" placeholder="请输入节点类别名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
 
       <el-select v-model="listQuery.useFlag" placeholder="状态" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in useFlagOptions" :key="item.key" :label="item.display_name" :value="item.key" />
@@ -12,11 +12,8 @@
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" @click="handleReset">
         重置
       </el-button>
-<!--       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         添加
-      </el-button> -->
-           <el-button class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-download" @click="handleCreate">
-        导入
       </el-button>
     </div>
 
@@ -30,20 +27,20 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="人员id" prop="id" sortable="custom" align="center" width="100" :class-name="getSortClass('id')">
+      <el-table-column label="节点类别id" prop="id" sortable="custom" align="center" width="100" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
-          <span>{{ row.operatorId }}</span>
+          <span>{{ row.operationTypeId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="人员code" width="110" align="center">
+      <el-table-column label="节点类别code" width="110" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.operatorCode }}</span>
+          <span>{{ row.operationTypeCode }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="人员名称" width="110" align="center">
+      <el-table-column label="节点类别名称" width="110" align="center">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.operatorName }}</span>
-          <!-- <span>{{ row.operatorName }}</span> -->
+          <span class="link-type" @click="handleUpdate(row)">{{ row.operationTypeName }}</span>
+          <!-- <span>{{ row.operationTypeName }}</span> -->
         </template>
       </el-table-column>
       <el-table-column label="启用状态" width="110" align="center">
@@ -86,11 +83,11 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="人员code" prop="operatorCode">
-          <el-input v-model="temp.operatorCode" type="text" placeholder="请输入人员code" />
+        <el-form-item label="节点类别code" prop="operationTypeCode">
+          <el-input v-model="temp.operationTypeCode" type="text" placeholder="请输入节点类别code" />
         </el-form-item>
-        <el-form-item label="人员name" prop="operatorName">
-          <el-input v-model="temp.operatorName" type="text" placeholder="请输入人员name" />
+        <el-form-item label="节点类别name" prop="operationTypeName">
+          <el-input v-model="temp.operationTypeName" type="text" placeholder="请输入节点类别name" />
         </el-form-item>
         <el-form-item label="启用状态" prop="useFlag">
           <el-switch v-model="temp.useFlag" active-color="#13ce66" inactive-color="#ff4949" />
@@ -130,12 +127,12 @@
 
 <script>
 
-import { fetchList, fetchPv, createOperator, updateOperator, updateUseFlag } from '@/api/operator'
+import { fetchList, fetchPv, createOperationType, updateOperationType, updateUseFlag } from '@/api/operationType'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-const operatorTypeOptions = []
+const operationTypeTypeOptions = []
 
 const useFlagOptions = [
   { key: '0', display_name: '禁用' },
@@ -143,13 +140,13 @@ const useFlagOptions = [
 ]
 
 // arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = operatorTypeOptions.reduce((acc, cur) => {
+const calendarTypeKeyValue = operationTypeTypeOptions.reduce((acc, cur) => {
   acc[cur.key] = cur.display_name
   return acc
 }, {})
 
 export default {
-  name: 'OperatorTable',
+  name: 'OperationTypeTable',
   components: { Pagination },
   directives: { waves },
   filters: {
@@ -185,9 +182,9 @@ export default {
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        operatorId: undefined,
-        operatorCode: '',
-        operatorName: '',
+        operationTypeId: undefined,
+        operationTypeCode: '',
+        operationTypeName: '',
         useFlag: true,
         startDate: new Date(),
         endDate: '',
@@ -196,16 +193,16 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '修改人员',
-        create: '添加人员'
+        update: '修改节点类别',
+        create: '添加节点类别'
       },
       dialogPvVisible: false,
       pvData: [],
       rules: {
         // type: [{ required: true, message: 'type is required', trigger: 'change' }],
         // timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        operatorCode: [{ required: true, message: '请填写人员code', trigger: 'blur' }],
-        operatorName: [{ required: true, message: '请填写人员name', trigger: 'blur' }],
+        operationTypeCode: [{ required: true, message: '请填写节点类别code', trigger: 'blur' }],
+        operationTypeName: [{ required: true, message: '请填写节点类别name', trigger: 'blur' }],
         startDate: [{ type: 'date', required: true, message: '请填写开始时间', trigger: 'change' }]
         // endDate: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }]
 
@@ -234,8 +231,8 @@ export default {
     /*     getMachineTypes() {
       fetchMachineTypeList().then(response => {
         console.log('tag', response.data)
-        this.operatorTypeOptions = response.data
-        console.log('tag', this.operatorTypeOptions)
+        this.operationTypeTypeOptions = response.data
+        console.log('tag', this.operationTypeTypeOptions)
       })
     }, */
     // 立即刷新数据列表
@@ -257,9 +254,9 @@ export default {
         }, 1 * 1000)
       })
     },
-    // 人员禁用启用操作
+    // 节点类别禁用启用操作
     handleModifyUseFlag(row, useFlag) {
-      updateUseFlag(row.operatorId).then(response => {
+      updateUseFlag(row.operationTypeId).then(response => {
         this.$message({
           message: response.message,
           type: 'success'
@@ -294,9 +291,9 @@ export default {
     // 重置temp实体类变量属性
     resetTemp() {
       this.temp = {
-        operatorId: undefined,
-        operatorCode: '',
-        operatorName: '',
+        operationTypeId: undefined,
+        operationTypeCode: '',
+        operationTypeName: '',
         useFlag: true,
         startDate: new Date(),
         endDate: '',
@@ -337,7 +334,7 @@ export default {
 
         if (valid) {
           // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          createOperator(this.temp).then(() => {
+          createOperationType(this.temp).then(() => {
             this.refreshList()
             // this.list.unshift(this.temp)
             this.dialogFormVisible = false
@@ -364,7 +361,7 @@ export default {
     // 修改操作
     updateData() {
       // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-      updateOperator(this.temp).then(() => {
+      updateOperationType(this.temp).then(() => {
         this.refreshList()
         // this.list.unshift(this.temp)
         this.dialogFormVisible = false

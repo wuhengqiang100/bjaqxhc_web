@@ -2,16 +2,16 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/operator/list',
+    url: '/operation/list',
     method: 'get',
     params: query,
     baseURL: 'http://127.0.0.1:8088'
   })
 }
 
-export function fetchOperatorTypeList() {
+export function fetchOperationTypeList() {
   return request({
-    url: '/operator/listOption',
+    url: '/operationType/listOption',
     method: 'get',
     baseURL: 'http://127.0.0.1:8088'
   })
@@ -19,16 +19,16 @@ export function fetchOperatorTypeList() {
 
 export function updateUseFlag(id) {
   return request({
-    url: '/operator/updateUseFlag',
+    url: '/operation/updateUseFlag',
     method: 'post',
     params: { id },
     baseURL: 'http://127.0.0.1:8088'
   })
 }
 
-export function fetchOperator(id) {
+export function fetchOperation(id) {
   return request({
-    url: '/operator/detail',
+    url: '/operation/detail',
     method: 'get',
     params: { id }
   })
@@ -36,24 +36,24 @@ export function fetchOperator(id) {
 
 export function fetchPv(pv) {
   return request({
-    url: '/operator/pv',
+    url: '/operation/pv',
     method: 'get',
     params: { pv }
   })
 }
 
-export function createOperator(data) {
+export function createOperation(data) {
   return request({
-    url: '/operator/create',
+    url: '/operation/create',
     method: 'post',
     data,
     baseURL: 'http://127.0.0.1:8088'
   })
 }
 
-export function updateOperator(data) {
+export function updateOperation(data) {
   return request({
-    url: '/operator/update',
+    url: '/operation/update',
     method: 'post',
     data,
     baseURL: 'http://127.0.0.1:8088'
